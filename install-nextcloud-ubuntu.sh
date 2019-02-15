@@ -7,12 +7,16 @@
 # Nextcloud 15
 # OpenSSL 1.1.1, TLSv1.3, NGINX 1.15.8 PHP 7.3
 # January, 30th 2019
+
 ################################################
 # Ubuntu 18.04 LTS AMD64 - Nextcloud 15
 ################################################
+
 #!/bin/bash
+
 ### Set current NGINX Releaseversion
 NGINXVER="1.15.8"
+
 ###global function to update and cleanup the environment
 function update_and_clean() {
 apt update
@@ -20,6 +24,7 @@ apt upgrade -y
 apt autoclean -y
 apt autoremove -y
 }
+
 ###global function to restart all cloud services
 function restart_all_services() {
 /usr/sbin/service nginx restart
@@ -27,6 +32,7 @@ function restart_all_services() {
 /usr/sbin/service redis-server restart
 /usr/sbin/service php7.3-fpm restart
 }
+
 ###global function to solve php-imagickexception as decribed here: https://www.c-rieger.de/solution-for-imagickexception-in-nextcloud-log
 function phpimagickexception() {
 /usr/sbin/service nginx stop
@@ -39,6 +45,7 @@ sed -i "s/rights\=\"none\" pattern\=\"XPS\"/rights\=\"read\|write\" pattern\=\"X
 /usr/sbin/service nginx restart
 /usr/sbin/service php7.3-fpm restart
 }
+
 ###global function to scan Nextcloud data and generate an overview for fail2ban & ufw
 function nextcloud_scan_data() {
 sudo -u www-data php /var/www/nextcloud/occ files:scan --all
@@ -46,6 +53,7 @@ sudo -u www-data php /var/www/nextcloud/occ files:scan-app-data
 fail2ban-client status nextcloud
 ufw status verbose
 }
+
 ###global function to show information regarding the upcoming MariaDB dialogue
 function mariadbinfo() {
 clear
@@ -66,6 +74,16 @@ clear
 
 ### START ###
 cd /usr/local/src
+
+## Check for existence of env variables file.
+if [[ ! -r nc_id_config.sh ]]; then
+   echo "ID Config file doesn't exist"
+   echo "Please make sure the file exists AND contains the right entries to ensure a successful install."
+   exit 1
+fi
+
+# Source the config variables file:
+. ./nc_id_config.sh
 
 ###prepare the server environment
 apt install gnupg2 wget -y
